@@ -1,0 +1,21 @@
+{
+  "name": "devblog-back-novo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Amand4May/devblog-back-novo.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Amand4May/devblog-back-novo/issues"
+  },
+  "homepage": "https://github.com/Amand4May/devblog-back-novo#readme"
+}
