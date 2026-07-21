@@ -5,10 +5,39 @@ import { upload } from '../middleware/uploadMiddleware';
 
 const router = Router();
 
+/**
+ * @swagger
+ * /artigos:
+ *   post:
+ *     summary: Cria um novo artigo com imagem
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               content:
+ *                 type: string
+ *               image:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       201:
+ *         description: Artigo criado com sucesso
+ */
+
 // criar artigo
 router.post('/', authMiddleware, upload.single('image'), async (req: AuthRequest, res: Response): Promise<void> => {
   const { title, content } = req.body;
   const author_id = req.user?.id; //  ID do token descriptografado
+
+  console.log("📦 Corpo recebido (Texto):", req.body);
+  console.log("🖼️ Arquivo recebido (Multer):", req.file);
   
   const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
 
