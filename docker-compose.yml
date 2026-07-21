@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  mysql-db:
+    image: mysql:8.0
+    container_name: mindgroup-mysql
+    restart: always
+    environment:
+      MYSQL_DATABASE: devblog_mysql       
+      MYSQL_ROOT_PASSWORD: rootpassword 
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./database_dump.sql:/docker-entrypoint-initdb.d/dump.sql
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
