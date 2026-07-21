@@ -17,7 +17,7 @@ export async function testConnection(): Promise<void> {
   try {
     const connection = await pool.getConnection();
     console.log("Conectado ao MySQL com sucesso.");
-    
+
     // Tabela de Usuarios
     await connection.query(`
       CREATE TABLE IF NOT EXISTS users (
