@@ -6,7 +6,7 @@ A proposta da DevBlog API é fornecer toda a estrutura de back-end para um blog:
 
 ## 👩‍💻 Desenvolvedora
 
-Desenvolvida por * **Amanda Mayumi** ([Amand4May](https://github.com/Amand4May)) para o processo seletivo da **Mind Group**.
+Desenvolvida por **Amanda Mayumi** ([Amand4May](https://github.com/Amand4May)) para o processo seletivo da **Mind Group**.
 
 ---
 
