@@ -23,10 +23,9 @@ testConnection();
 setupSwagger(app);
 
 // Injeção de Rotas
-app.use(userRoutes); // Deixando na raiz para o /login e /register funcionarem com o React
-app.use(articleRoutes); 
+app.use(userRoutes); 
+app.use('/articles', articleRoutes);
 
-// Inicia o Servidor HTTP
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });

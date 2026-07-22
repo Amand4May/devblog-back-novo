@@ -5,7 +5,7 @@ import { AuthRequest } from '../middleware/authMiddleware';
 // listar (GET)
 export const getArticles = async (req: Request, res: Response): Promise<void> => {
   try {
-    const [rows] = await pool.execute(`
+    const [rows]: any = await pool.query(`
       SELECT a.id, a.title, a.content, a.imageUrl, a.created_at, u.name as author
       FROM articles a
       LEFT JOIN users u ON a.author_id = u.id
@@ -13,26 +13,26 @@ export const getArticles = async (req: Request, res: Response): Promise<void> =>
     `);
     res.status(200).json(rows);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erro ao buscar artigos.' });
+    console.error('Erro ao buscar artigos:', error);
+    res.status(500).json({ error: 'Erro ao buscar os artigos.' });
   }
 };
 
 // criar (POST)
 export const createArticle = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
-    const { title, content } = req.body;
+    const { title, content, category, excerpt } = req.body;
     const authorId = req.user?.id;
-    const imageUrl = req.file ? `/uploads/${req.file.filename}` : null;
+    const imageUrl = req.file ? `/uploads/${req.file.filename}` : (req.body.imageUrl || null);
 
     const [result]: any = await pool.query(
-      'INSERT INTO articles (title, content, image_url, author_id) VALUES (?, ?, ?, ?)',
+      'INSERT INTO articles (title, content, imageUrl, author_id) VALUES (?, ?, ?, ?)',
       [title, content, imageUrl, authorId]
     );
 
     res.status(201).json({ message: 'Artigo criado com sucesso!', articleId: result.insertId });
   } catch (error) {
-    console.error(error);
+    console.error('Erro detalhado ao criar artigo:', error);
     res.status(500).json({ error: 'Erro ao criar o artigo.' });
   }
 };
