@@ -23,7 +23,7 @@ testConnection();
 setupSwagger(app);
 
 // Injeção de Rotas
-app.use(userRoutes); 
+app.use('/users', userRoutes); 
 app.use('/articles', articleRoutes);
 
 app.listen(PORT, () => {

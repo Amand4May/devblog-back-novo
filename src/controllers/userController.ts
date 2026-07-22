@@ -1,9 +1,15 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-import pool from '../database/database'; 
+import pool from '../database/database';
+// Importação do AuthRequest para as funções de perfil funcionarem
+import { AuthRequest } from '../middleware/authMiddleware'; 
 
 const SECRET_KEY = process.env.JWT_SECRET || 'chave-secreta-super-segura-devblog';
+
+// ==========================================
+// AUTENTICAÇÃO (LOGIN E REGISTRO)
+// ==========================================
 
 export const register = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -68,5 +74,62 @@ export const login = async (req: Request, res: Response): Promise<void> => {
   } catch (error) {
     console.error('Erro no login:', error);
     res.status(500).json({ error: 'Erro interno ao fazer login.' });
+  }
+};
+
+// ==========================================
+// PERFIL DO USUÁRIO
+// ==========================================
+
+// Buscar dados do perfil logado
+export const getProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    
+    // Agora busca também o avatar e a bio
+    const [rows]: any = await pool.query(
+      'SELECT id, name, email, avatar, bio FROM users WHERE id = ?', 
+      [userId]
+    );
+
+    if (rows.length === 0) {
+      res.status(404).json({ error: 'Usuário não encontrado' });
+      return;
+    }
+
+    res.json(rows[0]);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao buscar perfil' });
+  }
+};
+
+// Atualizar o perfil
+export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const userId = req.user?.id;
+    
+    const { name, bio, avatarUrl } = req.body; 
+    
+    const finalAvatar = req.file ? `/uploads/${req.file.filename}` : (avatarUrl || null);
+
+    if (finalAvatar) {
+      
+      await pool.query(
+        'UPDATE users SET name = ?, bio = ?, avatar = ? WHERE id = ?',
+        [name, bio, finalAvatar, userId]
+      );
+    } else {
+      
+      await pool.query(
+        'UPDATE users SET name = ?, bio = ? WHERE id = ?',
+        [name, bio, userId]
+      );
+    }
+
+    res.json({ message: 'Perfil atualizado com sucesso!' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Erro ao atualizar perfil' });
   }
 };

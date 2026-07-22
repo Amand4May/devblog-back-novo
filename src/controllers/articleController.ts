@@ -6,15 +6,39 @@ import { AuthRequest } from '../middleware/authMiddleware';
 export const getArticles = async (req: Request, res: Response): Promise<void> => {
   try {
     const [rows]: any = await pool.query(`
-  SELECT a.id, a.title, a.content, a.imageUrl, a.category, a.created_at, u.name as author
-  FROM articles a
-  LEFT JOIN users u ON a.author_id = u.id
-  ORDER BY a.created_at DESC
-`);
+      SELECT 
+        a.id, a.title, a.content, a.imageUrl, a.category, a.created_at, 
+        u.name as author, 
+        u.avatar as authorAvatar, 
+        u.bio as authorBio
+      FROM articles a
+      LEFT JOIN users u ON a.author_id = u.id
+      ORDER BY a.created_at DESC
+    `);
     res.status(200).json(rows);
   } catch (error) {
     console.error('Erro ao buscar artigos:', error);
     res.status(500).json({ error: 'Erro ao buscar os artigos.' });
+  }
+};
+
+// buscar artigos do usuário logado (GET /articles/me)
+export const getUserArticles = async (req: AuthRequest, res: Response): Promise<void> => {
+  try {
+    const authorId = req.user?.id; // Pega o ID de quem está logado pelo token
+
+    const [rows]: any = await pool.query(`
+      SELECT a.id, a.title, a.content, a.imageUrl, a.category, a.created_at, u.name as author
+      FROM articles a
+      LEFT JOIN users u ON a.author_id = u.id
+      WHERE a.author_id = ? 
+      ORDER BY a.created_at DESC
+    `, [authorId]); // <--- O SEGREDO ESTÁ AQUI: Filtra pelo dono!
+
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error('Erro ao buscar artigos do usuário:', error);
+    res.status(500).json({ error: 'Erro ao buscar os seus artigos.' });
   }
 };
 
@@ -23,7 +47,7 @@ export const getArticleById = async (req: Request, res: Response): Promise<void>
   try {
     const articleId = req.params.id;
     const [rows]: any = await pool.query(`
-      SELECT a.id, a.title, a.content, a.imageUrl, a.category, a.created_at, u.name as author
+      SELECT a.id, a.title, a.content, a.imageUrl, a.category, a.created_at, u.name as author, u.avatar as authorAvatar, u.bio as authorBio
       FROM articles a
       LEFT JOIN users u ON a.author_id = u.id
       WHERE a.id = ?

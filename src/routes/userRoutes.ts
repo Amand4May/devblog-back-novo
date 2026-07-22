@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { register, login } from '../controllers/userController';
+import { register, login, getProfile, updateProfile } from '../controllers/userController';
+import { authMiddleware } from '../middleware/authMiddleware';
+import { upload } from '../middleware/uploadMiddleware'; 
 
 const router = Router();
 
@@ -54,5 +56,11 @@ router.post('/register', register);
  *         description: E-mail ou senha inválidos
  */
 router.post('/login', login);
+
+// Buscar perfil
+router.get('/me', authMiddleware, getProfile);
+
+// Atualizar perfil (recebendo a imagem pelo campo 'avatar')
+router.put('/me', authMiddleware, upload.single('avatar'), updateProfile);
 
 export default router;

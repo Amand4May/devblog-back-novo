@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { upload } from '../middleware/uploadMiddleware';
-import { getArticles, getArticleById, createArticle, updateArticle, deleteArticle } from '../controllers/articleController';
+import { getArticles, getArticleById, createArticle, updateArticle, deleteArticle, getUserArticles } from '../controllers/articleController';
 
 const router = Router();
 
@@ -50,6 +50,25 @@ router.post('/', authMiddleware, upload.single('image'), createArticle);
  *                 type: object
  */
 router.get('/', getArticles);
+
+/**
+ * @swagger
+ * /articles/me:
+ *   get:
+ *     summary: Lista os artigos do usuário autenticado
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de artigos do usuário retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+router.get('/me', authMiddleware, getUserArticles);
 
 /**
  * @swagger
