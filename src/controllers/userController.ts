@@ -105,31 +105,38 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
 };
 
 // Atualizar o perfil
+// Atualizar o perfil
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
     const userId = req.user?.id;
-    
     const { name, bio, avatarUrl } = req.body; 
-    
-    const finalAvatar = req.file ? `/uploads/${req.file.filename}` : (avatarUrl || null);
 
-    if (finalAvatar) {
-      
-      await pool.query(
-        'UPDATE users SET name = ?, bio = ?, avatar = ? WHERE id = ?',
-        [name, bio, finalAvatar, userId]
-      );
-    } else {
-      
-      await pool.query(
-        'UPDATE users SET name = ?, bio = ? WHERE id = ?',
-        [name, bio, userId]
-      );
-    }
+    // Salva direto o nome, a bio e a URL do avatar enviada pelo front-end
+    await pool.query(
+      'UPDATE users SET name = ?, bio = ?, avatar = ? WHERE id = ?',
+      [name, bio || null, avatarUrl || null, userId]
+    );
 
-    res.json({ message: 'Perfil atualizado com sucesso!' });
+    // Busca os dados atualizados no banco para devolver ao front-end
+    const [rows]: any = await pool.query(
+      'SELECT id, name, email, avatar, bio FROM users WHERE id = ?', 
+      [userId]
+    );
+
+    const updatedUser = rows[0];
+
+    res.status(200).json({ 
+      message: 'Perfil atualizado com sucesso!',
+      user: {
+        id: updatedUser.id,
+        name: updatedUser.name,
+        email: updatedUser.email,
+        avatar: updatedUser.avatar,
+        bio: updatedUser.bio
+      }
+    });
   } catch (error) {
-    console.error(error);
+    console.error('Erro ao atualizar perfil:', error);
     res.status(500).json({ error: 'Erro ao atualizar perfil' });
   }
 };
