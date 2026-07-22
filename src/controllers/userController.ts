@@ -2,7 +2,6 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import pool from '../database/database';
-// Importação do AuthRequest para as funções de perfil funcionarem
 import { AuthRequest } from '../middleware/authMiddleware'; 
 
 const SECRET_KEY = process.env.JWT_SECRET || 'chave-secreta-super-segura-devblog';
@@ -86,7 +85,6 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
   try {
     const userId = req.user?.id;
     
-    // Agora busca também o avatar e a bio
     const [rows]: any = await pool.query(
       'SELECT id, name, email, avatar, bio FROM users WHERE id = ?', 
       [userId]
@@ -104,7 +102,7 @@ export const getProfile = async (req: AuthRequest, res: Response): Promise<void>
   }
 };
 
-// Atualizar o perfil
+
 // Atualizar o perfil
 export const updateProfile = async (req: AuthRequest, res: Response): Promise<void> => {
   try {
