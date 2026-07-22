@@ -12,21 +12,20 @@ const PORT = process.env.PORT || 3000;
 // Middlewares Globais
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
-// Expõe a pasta de uploads para acesso público de imagens
-app.use('/uploads', express.static('uploads'));
+// Expõe a pasta de uploads para acesso público de imagens (Mantendo a forma mais segura com path)
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Inicializa Banco de Dados
 testConnection();
 
+// Inicia a documentação
 setupSwagger(app);
 
 // Injeção de Rotas
-app.use('/usuarios', userRoutes);
-app.use('/artigos', articleRoutes);
+app.use('/users', userRoutes); 
+app.use('/articles', articleRoutes);
 
-// Inicia o Servidor HTTP
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
 });

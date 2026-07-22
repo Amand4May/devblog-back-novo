@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/authMiddleware';
 import { upload } from '../middleware/uploadMiddleware';
-import { getArticles, createArticle, updateArticle, deleteArticle } from '../controllers/articleController';
+import { getArticles, getArticleById, createArticle, updateArticle, deleteArticle, getUserArticles } from '../controllers/articleController';
 
 const router = Router();
 
 /**
  * @swagger
- * /artigos:
+ * /articles:
  *   post:
  *     summary: Cria um novo artigo com imagem
  *     security:
@@ -23,6 +23,8 @@ const router = Router();
  *                 type: string
  *               content:
  *                 type: string
+ *               category:
+ *                 type: string
  *               image:
  *                 type: string
  *                 format: binary
@@ -30,13 +32,11 @@ const router = Router();
  *       201:
  *         description: Artigo criado com sucesso
  */
-
-// criar artigo
 router.post('/', authMiddleware, upload.single('image'), createArticle);
 
 /**
  * @swagger
- * /artigos:
+ * /articles:
  *   get:
  *     summary: Lista todos os artigos publicados
  *     responses:
@@ -53,7 +53,46 @@ router.get('/', getArticles);
 
 /**
  * @swagger
- * /artigos/{id}:
+ * /articles/me:
+ *   get:
+ *     summary: Lista os artigos do usuário autenticado
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de artigos do usuário retornada com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ */
+router.get('/me', authMiddleware, getUserArticles);
+
+/**
+ * @swagger
+ * /articles/{id}:
+ *   get:
+ *     summary: Busca um artigo específico pelo ID
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID do artigo
+ *     responses:
+ *       200:
+ *         description: Detalhes do artigo retornados com sucesso
+ *       404:
+ *         description: Artigo não encontrado
+ */
+router.get('/:id', getArticleById);
+
+/**
+ * @swagger
+ * /articles/{id}:
  *   put:
  *     summary: Atualiza o título e conteúdo de um artigo
  *     security:
@@ -82,13 +121,11 @@ router.get('/', getArticles);
  *       403:
  *         description: Sem permissão (ou artigo não encontrado)
  */
-
-// atualizar
 router.put('/:id', authMiddleware, updateArticle);
 
 /**
  * @swagger
- * /artigos/{id}:
+ * /articles/{id}:
  *   delete:
  *     summary: Deleta um artigo
  *     security:
@@ -106,8 +143,6 @@ router.put('/:id', authMiddleware, updateArticle);
  *       403:
  *         description: Sem permissão (ou artigo não encontrado)
  */
-
-// deletar
 router.delete('/:id', authMiddleware, deleteArticle);
 
 export default router;
