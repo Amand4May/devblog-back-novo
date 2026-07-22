@@ -6,15 +6,38 @@ import { AuthRequest } from '../middleware/authMiddleware';
 export const getArticles = async (req: Request, res: Response): Promise<void> => {
   try {
     const [rows]: any = await pool.query(`
-      SELECT a.id, a.title, a.content, a.imageUrl, a.created_at, u.name as author
-      FROM articles a
-      LEFT JOIN users u ON a.author_id = u.id
-      ORDER BY a.created_at DESC
-    `);
+  SELECT a.id, a.title, a.content, a.imageUrl, a.category, a.created_at, u.name as author
+  FROM articles a
+  LEFT JOIN users u ON a.author_id = u.id
+  ORDER BY a.created_at DESC
+`);
     res.status(200).json(rows);
   } catch (error) {
     console.error('Erro ao buscar artigos:', error);
     res.status(500).json({ error: 'Erro ao buscar os artigos.' });
+  }
+};
+
+// buscar por ID (GET /articles/:id)
+export const getArticleById = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const articleId = req.params.id;
+    const [rows]: any = await pool.query(`
+      SELECT a.id, a.title, a.content, a.imageUrl, a.category, a.created_at, u.name as author
+      FROM articles a
+      LEFT JOIN users u ON a.author_id = u.id
+      WHERE a.id = ?
+    `, [articleId]);
+
+    if (rows.length === 0) {
+      res.status(404).json({ error: 'Artigo não encontrado.' });
+      return;
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (error) {
+    console.error('Erro ao buscar artigo por ID:', error);
+    res.status(500).json({ error: 'Erro ao buscar o artigo.' });
   }
 };
 
@@ -26,9 +49,9 @@ export const createArticle = async (req: AuthRequest, res: Response): Promise<vo
     const imageUrl = req.file ? `/uploads/${req.file.filename}` : (req.body.imageUrl || null);
 
     const [result]: any = await pool.query(
-      'INSERT INTO articles (title, content, imageUrl, author_id) VALUES (?, ?, ?, ?)',
-      [title, content, imageUrl, authorId]
-    );
+    'INSERT INTO articles (title, content, imageUrl, category, author_id) VALUES (?, ?, ?, ?, ?)',
+  [title, content, imageUrl, category || 'Tecnologia', authorId]
+);
 
     res.status(201).json({ message: 'Artigo criado com sucesso!', articleId: result.insertId });
   } catch (error) {
