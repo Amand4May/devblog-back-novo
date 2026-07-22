@@ -1,57 +1,58 @@
-import { Router, Request, Response } from 'express';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import pool from '../database/database';
+import { Router } from 'express';
+import { register, login } from '../controllers/userController';
 
 const router = Router();
 
-// novo usuario com senha encriptada
-router.post('/cadastro', async (req: Request, res: Response): Promise<void> => {
-  const { name, email, password } = req.body;
-  
-  try {
-    // embaralha 10x
-    const hashedPassword = await bcrypt.hash(password, 10);
-    
-    // insere o usuario no banco de dados
-    await pool.execute(
-      'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-      [name, email, hashedPassword]
-    );
-    
-    res.status(201).json({ message: 'Usuário cadastrado com sucesso!' });
-  } catch (error: any) {
-    // Trata erro de email duplicado no MySQL
-    if (error.code === 'ER_DUP_ENTRY') {
-      res.status(400).json({ error: 'Este email já está em uso.' });
-      return;
-    }
-    res.status(500).json({ error: 'Erro interno do servidor.' });
-  }
-});
+/**
+ * @swagger
+ * /register:
+ *   post:
+ *     summary: Cria uma nova conta de usuário
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: Cadastro realizado com sucesso
+ *       400:
+ *         description: Erro na requisição
+ */
+router.post('/register', register);
 
-// autentica usuario e retorna token jwt
-router.post('/login', async (req: Request, res: Response): Promise<void> => {
-  const { email, password } = req.body;
-  
-  try {
-    // busca o usuario no banco pelo email
-    const [rows]: any = await pool.execute('SELECT * FROM users WHERE email = ?', [email]);
-    const user = rows[0];
-
-    if (!user || !(await bcrypt.compare(password, user.password))) {
-      res.status(401).json({ error: 'Credenciais inválidas.' });
-      return;
-    }
-
-    // token dura 1d
-    const secret = process.env.JWT_SECRET || 'secret';
-    const token = jwt.sign({ id: user.id, email: user.email }, secret, { expiresIn: '1d' });
-    
-    res.status(200).json({ message: 'Login realizado com sucesso!', token });
-  } catch (error) {
-    res.status(500).json({ error: 'Erro interno ao realizar login.' });
-  }
-});
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Faz o login e retorna o token JWT
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login bem sucedido (retorna o token)
+ *       401:
+ *         description: E-mail ou senha inválidos
+ */
+router.post('/login', login);
 
 export default router;

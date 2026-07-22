@@ -9,7 +9,7 @@ services:
       MYSQL_DATABASE: devblog_mysql       
       MYSQL_ROOT_PASSWORD: rootpassword 
     ports:
-      - "3306:3306"
+    - "3307:3306"
     volumes:
       - ./database_dump.sql:/docker-entrypoint-initdb.d/dump.sql
       - db_data:/var/lib/mysql
