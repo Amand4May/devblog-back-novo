@@ -81,8 +81,8 @@ Crie um arquivo `.env` na raiz do projeto, baseando-se no modelo abaixo:
 PORT=3000
 DB_HOST=localhost
 DB_USER=root
-DB_PASSWORD=root
-DB_NAME=devblog
+DB_PASSWORD=sua_senha
+DB_NAME=devblog_mysql 
 JWT_SECRET=sua_chave_secreta_aqui
 ```
 
